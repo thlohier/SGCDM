@@ -107,6 +107,7 @@ for(sp in 1:length(effect_env))
 pft           <- read.table("Data/pft.csv",sep=";");
 plant_types   <- unique(as.vector(pft[[3]]));
 sp_names_jena <- sp_names[-to_del];
+names_pft     <- numeric();
 param_pft     <- matrix(0,0,5);
 domina        <- list();
 
@@ -114,11 +115,12 @@ for(i in 1:length(plant_types))
 {
 	type_sp   <- which(as.vector(pft[[3]])==plant_types[i]);
 	ind_param <- numeric();
+	
 	for(j in 1:length(type_sp))
 		ind_param <- c(ind_param,which(sp_names_jena==pft[[1]][type_sp[j]]));
 	
-	names_pft  <- c(names_pft, sp_names[ind_param]) 
-	param_pft  <- rbind(param_pft,t(param_mat[,ind_param]))
+	names_pft  <- c(names_pft, sp_names_jena[ind_param]) ;
+	param_pft  <- rbind(param_pft,t(param_mat[,ind_param]));
 	domina_tmp <- cbind(effect_env,effect_demo,effect_obs)[ind_param,];
 	domina     <- c(domina,list(domina_tmp));
 }
@@ -131,8 +133,9 @@ to_write <- 1;
 
 if(to_write)
 {
-	tab_1 <- cbind(round(param_pft,3),round(rbind(domina[[1]],domina[[2]],domina[[3]],domina[[4]]),2));
-	write.csv2(tab_1,"Full/Table_1.csv")
+	tab_1           <- cbind(round(param_pft,3),round(rbind(domina[[1]],domina[[2]],domina[[3]],domina[[4]]),2));
+	rownames(tab_1) <- names_pft;
+	write.csv2(tab_1,"Full/Table_1.csv",row.names=TRUE);
 }
 
 
@@ -140,7 +143,6 @@ if(to_write)
 ###################################################### Plot the results (Fig. 3) ######################################################
 
 to_plot <- 0;
-
 
 if(to_plot)
 {
