@@ -46,27 +46,32 @@ for(i in 1:length(N_species))
 {
 	## Observed community statistics
 	fic_names    <- paste("Full/Mixtures/stat_obs_",N_species[i],".txt",sep="");
+	# fic_names    <- paste("Full/Mixtures_rnd/stat_obs_",N_species[i],".txt",sep="");
 	stat_obs_tmp <- read.table(fic_names,h=TRUE);
 	stat_obs     <- matrix(unlist(stat_obs_tmp),ncol=length(stat_obs_tmp));
 
 	## Simulated community statistics
 	fic_names    <- paste("Full/Mixtures/stat_sim_",N_species[i],".txt",sep="");
+	# fic_names    <- paste("Full/Mixtures_rnd/stat_sim_",N_species[i],".txt",sep="");
 	stat_sim_tmp <- read.table(fic_names,h=TRUE);
 	stat_sim     <- matrix(unlist(stat_sim_tmp),ncol=length(stat_sim_tmp));
 
 	## Simulated average community biomass
 	fic_names <- paste("Full/Mixtures/mean_rep_",N_species[i],".txt",sep="");
+	# fic_names <- paste("Full/Mixtures_rnd/mean_rep_",N_species[i],".txt",sep="");
 	Mean_tmp  <- read.table(fic_names,h=TRUE);
 	Mean_rep  <- matrix(unlist(Mean_tmp),ncol=length(Mean_tmp));
 	mix_codes <- names(Mean_tmp);
 	
 	## Simulated standard deviation of community biomass
 	fic_names <- paste("Full/Mixtures/deviation_rep_",N_species[i],".txt",sep="");
+	# fic_names <- paste("Full/Mixtures_rnd/deviation_rep_",N_species[i],".txt",sep="");
 	Sd_tmp    <- read.table(fic_names,h=TRUE);
 	Sd_rep    <- matrix(unlist(Sd_tmp),ncol=length(Sd_tmp));
 	
 	## Simulated  Simpson's concentration index  of community biomass
 	fic_names <- paste("Full/Mixtures/simpson_rep_",N_species[i],".txt",sep="");
+	# fic_names <- paste("Full/Mixtures_rnd/simpson_rep_",N_species[i],".txt",sep="");
 	L_tmp     <- read.table(fic_names,h=TRUE);
 	L_rep     <- matrix(unlist(L_tmp),ncol=length(L_tmp));
 	
@@ -185,13 +190,32 @@ to_write <- 1;
 
 if(to_write)
 {
+	## Create the directory if it does not exixt yet
+	main_dir        <- getwd();
+	sub_dir         <- "Tables";
+	
+	if(!file.exists(paste(main_dir, sub_dir, sep = "/", collapse = "/")))
+		dir.create(file.path(main_dir, sub_dir), showWarnings = FALSE);
+	
+	
+	## Write Tab. 3 in a .csv file
 	tab_3 <- matrix(NA,0,(length(N_species)+1));
 	
 	for(i in 1:dim(R)[1])
 		tab_3 <- rbind(tab_3,rbind(R[i,],N_dev[i,],p_dev[i,]));
+	rownames(tab_3) <- rep(c("R","N_dev","p"),3);
+	
+	if(file.exists("Tables/Table_3.csv"))
+	{
+		x <- readline("The file Table_3.csv already exists. Do you want to overwritte it ? (y/n):")
 		
-	write.csv2(round(tab_3,2),"Tables/Table_3.csv");
+		if(x == "y")
+			write.csv2(round(tab_3,1), "Tables/Table_3.csv", row.names=TRUE);
+	}
+	else
+		write.csv2(round(tab_3,1), "Tables/Table_3.csv", row.names=TRUE);
 }
+
 
 
 ###################################################### Plot the results (Fig. 4) ######################################################
@@ -200,35 +224,58 @@ to_plot <- 1;
 
 if(to_plot)
 {
-	stat_obs_vect <- rbind(M_obs_vect, SD_obs_vect, L_obs_vect);
-	stat_sim_vect <- rbind(M_sim_vect, SD_sim_vect, L_sim_vect);
+	## Create the directories if it does not exixt yet
+	main_dir        <- getwd();
+	sub_dir         <- "Figures";
 	
-	fig_nb <- c("(A)","(B)","(C)");
-	x_lab  <- c(expression("log(Observed "*bar(B)*")"),expression("log(Observed "*sigma[B]*")"),expression("Observed "*lambda));
-	y_lab  <- c(expression("log(Predicted "*bar(B)*")"),expression("log(Predicted "*sigma[B]*")"),expression("Predicted "*lambda));
-	my_col <- c("black","red","blue","green");
-
+	if(!file.exists(paste(main_dir, sub_dir, sep = "/", collapse = "/")))
+		dir.create(file.path(main_dir, sub_dir), showWarnings = FALSE);
 	
-	png("Figures/predictions.png",width=900,height=300)
-	par(mfrow=c(1,3))
-	par(cex.axis=1.7)
-	par(cex.lab=1.9)
-	par(mar=c(5,6,4,3))
 	
-	for(i in 1:dim(stat_obs_vect)[1])
+	## Function for the drawing of Fig. 4
+	plotFig4 <- function()
 	{
-		y_min <- log(min(c(stat_obs_vect[i,],stat_sim_vect[i,])));
-		y_max <- log(max(c(stat_obs_vect[i,],stat_sim_vect[i,])));
+		stat_obs_vect <- rbind(M_obs_vect, SD_obs_vect, L_obs_vect);
+		stat_sim_vect <- rbind(M_sim_vect, SD_sim_vect, L_sim_vect);
 		
-		plot(log(stat_obs_vect[i,]),log(stat_obs_vect[i,]),ylim=c(y_min,y_max),xlab=x_lab[i],ylab=y_lab[i],type="l");
+		fig_nb <- c("(A)","(B)","(C)");
+		x_lab  <- c(expression("log(Observed "*bar(B)*")"),expression("log(Observed "*sigma[B]*")"),expression("log(Observed "*lambda*")"));
+		y_lab  <- c(expression("log(Predicted "*bar(B)*")"),expression("log(Predicted "*sigma[B]*")"),expression("log(Predicted "*lambda*")"));
+		my_col <- c("black","red","blue","green");
 
-		for(k in 1:length(N_species))
-			lines(log(stat_obs_vect[i,(sum(N_mixtures[1:k])+1):(sum(N_mixtures[1:(k+1)]))]),log(stat_sim_vect[i,(sum(N_mixtures[1:k])+1):(sum(N_mixtures[1:(k+1)]))]),type="p",pch=20+k,col=my_col[k],cex=2,lwd=2);
+		png("Figures/Figure_4.png",width=900,height=300)
+		par(mfrow=c(1,3))
+		par(cex.axis=1.7)
+		par(cex.lab=1.9)
+		par(mar=c(5,6,4,3))
 		
-		my_legend <- bquote(R^2 == .(R[i,1]));
-		legend("topleft",as.expression(my_legend),bty="n",cex=1.75);
-		mtext(fig_nb[i],side=3,line=1.5,adj=0.0,cex=1.5);
+		for(i in 1:dim(stat_obs_vect)[1])
+		{
+			y_min <- log(min(c(stat_obs_vect[i,],stat_sim_vect[i,])));
+			y_max <- log(max(c(stat_obs_vect[i,],stat_sim_vect[i,])));
+			
+			plot(log(stat_obs_vect[i,]),log(stat_obs_vect[i,]),ylim=c(y_min,y_max),xlab=x_lab[i],ylab=y_lab[i],type="l");
+
+			for(k in 1:length(N_species))
+				lines(log(stat_obs_vect[i,(sum(N_mixtures[1:k])+1):(sum(N_mixtures[1:(k+1)]))]),log(stat_sim_vect[i,(sum(N_mixtures[1:k])+1):(sum(N_mixtures[1:(k+1)]))]),type="p",pch=20+k,col=my_col[k],cex=2,lwd=2);
+			
+			my_legend <- bquote(R^2 == .(R[i,1]));
+			legend("topleft",as.expression(my_legend),bty="n",cex=1.75);
+			mtext(fig_nb[i],side=3,line=1.5,adj=0.0,cex=1.5);
+		}
+		
+		dev.off();
 	}
 	
-	dev.off();
+	
+	## Check if Fig. 4 has already been drawn
+	if(file.exists("Figures/Figure_4.png"))
+	{
+		x <- readline("The file Figure_4.png already exists. Do you want to overwritte it ? (y/n):")
+		
+		if(x == "y")
+			plotFig4();
+	}
+	else
+		plotFig4();		
 }
