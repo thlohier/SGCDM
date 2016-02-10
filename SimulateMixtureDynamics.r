@@ -2,7 +2,7 @@ rm(list=ls(all=TRUE))
 
 
 ## Generate random vectors chosen from the multivariate normal distribution
-source("mvnrnd.r");
+source("Tools/mvnrnd.r");
 
 
 #######################################################################################################################################
@@ -292,10 +292,26 @@ for(n in 2)
 	
 	################################# Write the observed and simulated community statistics in .txt files #################################
 	
-	to_write <- TRUE;
+	to_write <- 1;
 	
 	if(to_write)
 	{
+		main_dir        <- getwd();
+		sub_dir         <- "Full";
+		new_dir         <- "Mixtures";
+		
+		if(!file.exists(paste(main_dir, sub_dir, sep = "/", collapse = "/")))
+		{
+			dir.create(file.path(main_dir, sub_dir), showWarnings = FALSE);
+			setwd(file.path(main_dir, sub_dir));
+			
+			if(!file.exists(paste(main_dir, sub_dir, new_dir, sep = "/", collapse = "/")))
+				dir.create(file.path(main_dir, sub_dir, new_dir), showWarnings = FALSE);
+		}
+		
+		
+		## Save community statistics obtained for each replica in .txt files
+		
 		main_dir        <- getwd();
 		sub_dir         <- "Full";
 		new_dir         <- "Mixtures";
@@ -321,5 +337,6 @@ for(n in 2)
 		stat_sim           <- rbind(M_sim,SD_sim,l_sim);
 		rownames(stat_sim) <- mix_codes;
 		write.table(round(stat_sim,4), paste("Full/Mixtures/stat_sim_",n,".txt",sep=""), sep="\t", row.names=FALSE, col.names=TRUE);
+		}
 	}
 }
