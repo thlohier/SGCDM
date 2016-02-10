@@ -177,71 +177,99 @@ for(sp in 1:N_species)
 
 ######################################### Write the results of model checking in a .csv fils ##########################################
 
-to_write <- 0;
+to_write <- 1;
 
 if(to_write)
 {
-	tab_S2           <- cbind(round(cbind(kolmo_env,kolmo_demo,kolmo_obs),3),round(cbind(p_val_m,p_val_sd),2));
-	rownames(tab_S2) <- sp_names;
-	write.csv2(tab_S2,"Full/Table_S2.csv", row.names=TRUE);
+	## Create the directory if it does not exist yet
+	main_dir        <- getwd();
+	sub_dir         <- "Tables";
+	
+	if(!file.exists(paste(main_dir, sub_dir, sep = "/", collapse = "/")))
+		dir.create(file.path(main_dir, sub_dir), showWarnings = FALSE);
+	
+	
+	## Write Tab. S4 in a .csv file
+	tab_S4           <- cbind(round(cbind(kolmo_env,kolmo_demo,kolmo_obs),3),round(cbind(p_val_m,p_val_sd),2));
+	rownames(tab_S4) <- sp_names;
+	colnames(tab_S4) <- c("u_e","u_d","u_o","B_av","B_sd");
+	
+	if(file.exists("Tables/Table_S4.csv"))
+	{
+		x <- readline("The file Table_S4.csv already exists. Do you want to overwritte it ? (y/n):")
+		
+		if(x == "y")
+			write.csv2(tab_S4, "Tables/Table_S4.csv", row.names=TRUE);
+	}
+	else
+		write.csv2(tab_S4, "Tables/Table_S4.csv", row.names=TRUE);
 }
 
 
 
 ###################################################### Plot the results (Fig. 2) ######################################################
 
-to_plot <- 0;
+to_plot <- 1;
 
 if(to_plot)
 {
+	## Create the directory if it does not exist yet
 	main_dir        <- getwd();
 	sub_dir         <- "Figures";
-	dir.create(file.path(main_dir, sub_dir), showWarnings = FALSE);
+	
+	if(!file.exists(paste(main_dir, sub_dir, sep = "/", collapse = "/")))
+		dir.create(file.path(main_dir, sub_dir), showWarnings = FALSE);
 	
 	
-	png("Figures/Normality_test.png",width=900,height=300);
+	## Function for the drawing of Fig. 2
+	plotFig2 <- function()
+	{
+		png("Figures/Figure_2.png",width=900,height=600);
 
-	par(mfrow=c(1,3))
-	par(cex.axis=1.75)
-	par(cex.lab=2)
-	par(mar=c(5,6,4,3))
+		par(mfrow=c(2,3))
+		par(cex.axis=1.75)
+		par(cex.lab=2)
+		par(mar=c(5,6,4,3))
 
-	br <- seq(0,round(max(kolmo_env_plot)+0.05,1),0.05);
-	hist(kolmo_env_plot,breaks=br,xlab="p-values",main="");
-	lines(c(0.05,0.05),c(-5,20),col="blue",lwd=2);
-	mtext("(A)",side=3,line=1.5,adj=0.0,cex=1.5)
+		br <- seq(0,round(max(kolmo_env_plot)+0.05,1),0.05);
+		hist(kolmo_env_plot,breaks=br,xlab="p-values",main="");
+		lines(c(0.05,0.05),c(-5,20),col="blue",lwd=2);
+		mtext("(A)",side=3,line=1.5,adj=0.0,cex=1.5)
 
-	br <- seq(0,round(max(kolmo_demo_plot)+0.05,1),0.05);
-	hist(kolmo_demo_plot,breaks=br,xlab="p-values",main="");
-	lines(c(0.05,0.05),c(-5,20),col="blue",lwd=2);
-	mtext("(B)",side=3,line=1.5,adj=0.0,cex=1.5)
+		br <- seq(0,round(max(kolmo_demo_plot)+0.05,1),0.05);
+		hist(kolmo_demo_plot,breaks=br,xlab="p-values",main="");
+		lines(c(0.05,0.05),c(-5,20),col="blue",lwd=2);
+		mtext("(B)",side=3,line=1.5,adj=0.0,cex=1.5)
 
-	br <- seq(0,round(max(kolmo_obs_plot)+0.05,1),0.05);
-	hist(kolmo_obs_plot,breaks=br,xlab="p-values",main="");
-	lines(c(0.05,0.05),c(-5,20),col="blue",lwd=2);
-	mtext("(C)",side=3,line=1.5,adj=0.0,cex=1.5)
+		br <- seq(0,round(max(kolmo_obs_plot)+0.05,1),0.05);
+		hist(kolmo_obs_plot,breaks=br,xlab="p-values",main="");
+		lines(c(0.05,0.05),c(-5,20),col="blue",lwd=2);
+		mtext("(C)",side=3,line=1.5,adj=0.0,cex=1.5)
 
-	dev.off();
+		br <- seq(0,round(max(p_val_m),1),0.025);
+		hist(p_val_m,breaks=br,xlab="p-values",main="");
+		lines(c(0.025,0.025),c(-5,20),col="blue",lwd=2);
+		lines(c(0.975,0.975),c(-5,20),col="blue",lwd=2);
+		mtext("(D)",side=3,line=1.5,adj=0.0,cex=1.5)
+
+		br <- seq(0,round(max(p_val_sd),1),0.025);
+		hist(p_val_sd,breaks=br,xlab="p-values",main="");
+		lines(c(0.025,0.025),c(-5,20),col="blue",lwd=2);
+		lines(c(0.975,0.975),c(-5,20),col="blue",lwd=2);
+		mtext("(E)",side=3,line=1.5,adj=0.0,cex=1.5)
+
+		dev.off();
+	}
 	
 	
-	png("Figures/Reproduction.png",width=800,height=400);
-
-	par(mfrow=c(1,2))
-	par(cex.axis=1.75)
-	par(cex.lab=2)
-	par(mar=c(5,6,4,3))
-
-	br <- seq(0,round(max(p_val_m),1),0.025);
-	hist(p_val_m,breaks=br,xlab="p-values",main="");
-	lines(c(0.025,0.025),c(-5,20),col="blue",lwd=2);
-	lines(c(0.975,0.975),c(-5,20),col="blue",lwd=2);
-	mtext("(D)",side=3,line=1.5,adj=0.0,cex=1.5)
-
-	br <- seq(0,round(max(p_val_sd),1),0.025);
-	hist(p_val_sd,breaks=br,xlab="p-values",main="");
-	lines(c(0.025,0.025),c(-5,20),col="blue",lwd=2);
-	lines(c(0.975,0.975),c(-5,20),col="blue",lwd=2);
-	mtext("(E)",side=3,line=1.5,adj=0.0,cex=1.5)
-
-	dev.off();
+	## Check if Fig. 3 has already been drawn
+	if(file.exists("Figures/Figure_2.png"))
+	{
+		x <- readline("The file Figure_2.png already exists. Do you want to overwritte it ? (y/n):")
+		
+		if(x == "y")
+			plotFig2();
+	}
+	else
+		plotFig2();	
 }
