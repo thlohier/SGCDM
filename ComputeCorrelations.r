@@ -1,7 +1,7 @@
 rm(list=ls(all=TRUE))
 
-source("ExtractTraits.r");
-source("ComputeCorrelationAll.r");
+source("Tools/extractTraits.r");
+source("Tools/computeCorrelationAll.r");
 
 
 #######################################################################################################################################
@@ -129,18 +129,27 @@ to_write <- 1;
 
 if(to_write)
 {
+	## Create the directory if it does not exixt yet
+	main_dir        <- getwd();
+	sub_dir         <- "Tables";
+	
+	if(!file.exists(paste(main_dir, sub_dir, sep = "/", collapse = "/")))
+		dir.create(file.path(main_dir, sub_dir), showWarnings = FALSE);
+	
+	
 	## Correlation between model parameters and plant functional traits
 	tab_2     <- matrix(NA,0,6);
 	order_tab <- c(0,5,10,15);
 	
 	for(i in 1:dim(cor_traits_all)[1])
 		tab_2 <- rbind(tab_2,cor_traits_all[i,],cor_traits_pft[(order_tab+i),]);
-		
-	write.csv2(tab_2,"Tables/Table_2.csv");
+	
+	rownames(tab_2) <- rep(c("All",plant_types),5);
+	colnames(tab_2) <- rep(c("R","p-value"),3);
 	
 	
 	## Correlation between the different model parameters
-	tab_S3    <- matrix(NA,0,6);
+	tab_S5    <- matrix(NA,0,6);
 	order_row <- c(1,3,4);
 	order_col <- c(3,4,5);
 	
@@ -151,7 +160,7 @@ if(to_write)
 		for(j in 1:length(order_col))
 			line_tmp <- c(line_tmp,cor_param_all[order_row[i],order_col[j]],p_param_all[order_row[i],order_col[j]]);
 		
-		tab_S3 <- rbind(tab_S3,line_tmp);
+		tab_S5 <- rbind(tab_S5,line_tmp);
 			
 		
 		for(pft in 1:length(cor_param_pft))
@@ -161,9 +170,26 @@ if(to_write)
 			for(j in 1:length(order_col))
 				line_pft_tmp <- c(line_pft_tmp,cor_param_pft[[pft]][order_row[i],order_col[j]],p_param_pft[[pft]][order_row[i],order_col[j]]);
 			
-			tab_S3 <- rbind(tab_S3,line_pft_tmp);
+			tab_S5 <- rbind(tab_S5,line_pft_tmp);
 		}
 	}
 	
-	write.csv2(tab_S3,"Tables/Table_S3.csv", row.names=FALSE);
+	rownames(tab_S5) <- rep(c("All",plant_types),3);
+	colnames(tab_S5) <- rep(c("R","p-value"),3);
+	
+	file_names <- c("Tables/Table_2.csv","Tables/Table_S5.csv");
+	files      <- list(tab_2,tab_S5);
+	
+	for(i in 1:length(file_names))
+	{
+		if(file.exists(file_names[i]))
+		{
+			x <- readline(paste("The file", file_names[i], "already exists. Do you want to overwritte it ? (y/n):"))
+		
+			if(x == "y")
+				write.csv2(files[[i]], file_names[i], row.names=TRUE);
+		}
+		else
+			write.csv2(files[[i]], file_names[i], row.names=TRUE);
+	}
 }
