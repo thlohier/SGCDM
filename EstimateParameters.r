@@ -15,8 +15,8 @@ B_i     <- 2;
 
 ######################################## Extract biomass data for species grown in monoculture ########################################
 
-info       <- read.table("Data/info_small.csv",sep=";",h=T,stringsAsFactors=F);
-bio        <- read.table("Data/biomass_mono.csv",sep=";",h=T,stringsAsFactors=F);
+info       <- read.table("Data/info_small.csv",sep=";",h=TRUE,stringsAsFactors=FALSE);
+bio        <- read.table("Data/biomass_mono.csv",sep=";",h=TRUE,stringsAsFactors=FALSE);
 
 headers    <- names(info);
 plotcode   <- as.vector(unique(bio[[1]]));
@@ -124,7 +124,7 @@ for(sp in 1:N_species)
 K         <- numeric();
 
 for(sp in 1:N_species)
-	K <- c(K,2*max(bio_real[[sp]],na.rm=T));
+	K <- c(K,2*max(bio_real[[sp]],na.rm=TRUE));
 
 
 
@@ -148,6 +148,7 @@ computeR <- function(inR)
 }
 
 
+## Estimation of the species growth rate through minimization of computeR(r)
 for(sp in 1:N_species)
 {
 	N_season <- dim(bio_real[[sp]])[1];
@@ -181,47 +182,14 @@ for(sp in 1:N_species)
 
 
 
-######################################## Verification of r values founded ########################################
-
-bio_test <- list();
-error    <- numeric();
-
-for(sp in 1:N_species)
-{	
-	B_test <- matrix(-1,N_season,N_plot);
-	
-	for(p in 1:N_plot)
-	{
-		for(season in 1:N_season)
-		{
-			B_prec <- B_i;
-			
-			for(day in 1:N_days)
-			{
-				B_cour <- B_prec + r[[sp]][season,p]*B_prec*(1-(B_prec/K[sp]));
-				B_prec <- B_cour;
-			}
-			
-			B_test[season,p] <- B_cour;
-		}
-	}
-	
-	bio_test <- c(bio_test,list(B_test));
-}
-
-for(sp in 1:N_species)
-	error <- c(error,max(abs(bio_real[[sp]] - bio_test[[sp]]),na.rm=T));
-
-
-
 ######################################## Estimation of model parameters (r_m, sigma_e, sigma_d) #######################################
 
 # Esimated model parameters
-r_m  <- numeric(0);
-s_e  <- numeric(0);
-s_d  <- numeric(0); 
-u_e  <- matrix(0,N_season,N_species);
-ac_e <- numeric(0);
+r_m  <- numeric();
+s_e  <- numeric();
+s_d  <- numeric(); 
+u_e  <- matrix(NA,N_season,N_species);
+ac_e <- numeric();
 
 ## Log likelihood function
 F <- function(inP)
@@ -304,26 +272,31 @@ for(sp in 1:N_species)
 
 ###################################### Save model parameters and simulation details in .txt files #####################################
 
-to_write <- 0;
+to_write <- 1;
 
-if(to_write==TRUE)
+if(to_write)
 {
-	main_dir        <- getwd();
-	sub_dir         <- "Full";
-	dir.create(file.path(main_dir, sub_dir), showWarnings = FALSE);
-	setwd(file.path(main_dir, sub_dir));
+	## Create the directory if it does not exixt yet
+	main_dir <- getwd();
+	sub_dir  <- "Full";
 	
-	sec_dir         <- getwd();
-	sub_dir_1       <- "Growth";
-	dir.create(file.path(sec_dir, sub_dir_1), showWarnings = FALSE);
-	sub_dir_2       <- "Demo";
-	dir.create(file.path(sec_dir, sub_dir_2), showWarnings = FALSE);
-	sub_dir_3       <- "Obs";
-	dir.create(file.path(sec_dir, sub_dir_3), showWarnings = FALSE);
-	sub_dir_4       <- "Biomass";
-	dir.create(file.path(sec_dir, sub_dir_4), showWarnings = FALSE);
-	
-	setwd(main_dir);
+	if(!file.exists(paste(main_dir, sub_dir, sep = "/", collapse = "/")))
+	{
+		dir.create(file.path(main_dir, sub_dir), showWarnings = FALSE);
+		setwd(file.path(main_dir, sub_dir));
+		
+		sec_dir         <- getwd();
+		sub_dir_1       <- "Growth";
+		dir.create(file.path(sec_dir, sub_dir_1), showWarnings = FALSE);
+		sub_dir_2       <- "Demo";
+		dir.create(file.path(sec_dir, sub_dir_2), showWarnings = FALSE);
+		sub_dir_3       <- "Obs";
+		dir.create(file.path(sec_dir, sub_dir_3), showWarnings = FALSE);
+		sub_dir_4       <- "Biomass";
+		dir.create(file.path(sec_dir, sub_dir_4), showWarnings = FALSE);
+		
+		setwd(main_dir);
+	}
 	
 	
 	param           <- cbind(r_m,K,s_e,s_d,s_o);
