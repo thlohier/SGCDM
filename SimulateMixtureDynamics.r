@@ -32,8 +32,8 @@ env     <- read.table("Full/env.txt",h=TRUE);
 ## Mixture codes
 plotcode   <- as.vector(unique(biomass$plotcode));
 
-for(n in 2)
-# for(n in N_sp)
+
+for(n in N_sp)
 {
 	mix_codes  <- numeric();
 	mix_names  <- list();
@@ -55,8 +55,8 @@ for(n in 2)
 	SD_rep      <- matrix(NA,N_replica,0);
 	l_rep       <- matrix(NA,N_replica,0);
 	
-	for(p in 9:9)
-	# for(p in 1:length(plotcode))
+	
+	for(p in 1:length(plotcode))
 	{	
 		######################################## Extract biomass data for species grown in mixture ########################################
 		
