@@ -281,9 +281,9 @@ for(n in N_sp)
 				
 				
 				## Compute the average community statistics
-				M_sim     <- c(M_sim,mean(M_rep));
-				SD_sim    <- c(SD_sim,mean(SD_rep));
-				l_sim     <- c(l_sim,mean(l_rep));
+				M_sim     <- c(M_sim,mean(M_rep_mix));
+				SD_sim    <- c(SD_sim,mean(SD_rep_mix));
+				l_sim     <- c(l_sim,mean(l_rep_mix));
 			}
 		}
 	}
