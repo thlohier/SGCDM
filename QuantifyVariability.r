@@ -133,34 +133,77 @@ to_write <- 1;
 
 if(to_write)
 {
+	## Create the directory if it does not exixt yet
+	main_dir        <- getwd();
+	sub_dir         <- "Tables";
+	
+	if(!file.exists(paste(main_dir, sub_dir, sep = "/", collapse = "/")))
+		dir.create(file.path(main_dir, sub_dir), showWarnings = FALSE);
+	
+	
+	## Write Tab. 1 in a .csv file
 	tab_1           <- cbind(round(param_pft,3),round(rbind(domina[[1]],domina[[2]],domina[[3]],domina[[4]]),2));
 	rownames(tab_1) <- names_pft;
-	write.csv2(tab_1,"Full/Table_1.csv",row.names=TRUE);
+	colnames(tab_1) <- c("r_m","K","sigma_e","sigma_d","sigma_o","S_e","S_d","S_o");
+	
+	if(file.exists("Tables/Table_1.csv"))
+	{
+		x <- readline("The file Table_1.csv already exists. Do you want to overwritte it ? (y/n):")
+		
+		if(x == "y")
+			write.csv2(tab_1, "Tables/Table_1.csv", row.names=TRUE);
+	}
+	else
+		write.csv2(tab_1, "Tables/Table_1.csv", row.names=TRUE);
 }
 
 
 
 ###################################################### Plot the results (Fig. 3) ######################################################
 
-to_plot <- 0;
+to_plot <- 1;
 
 if(to_plot)
 {
-	png("Figures/Variability.png",width=800,height=800);
-
-	par(mfrow=c(2,2))
-	par(cex.axis=1.75)
-	par(cex.lab=2)
-	par(mar=c(5,6,4,3))
-	par(mgp=c(3,2,0))
-
-	my_letters <- c("(A)","(B)","(C)","(D)");
-
-	for(ft in 1:length(domina))
+	## Create the directory if it does not exixt yet
+	main_dir        <- getwd();
+	sub_dir         <- "Figures";
+	
+	if(!file.exists(paste(main_dir, sub_dir, sep = "/", collapse = "/")))
+		dir.create(file.path(main_dir, sub_dir), showWarnings = FALSE);
+	
+	
+	## Function for the drawing of Fig. 3
+	plotFig3 <- function()
 	{
-		boxplot(domina[[ft]],ylim=c(0,1),names=c(expression(Sigma[e]),expression(Sigma[d]),expression(Sigma[o])));
-		mtext(my_letters[ft],side=3,line=1.5,adj=0.0,cex=1.5)
-	}
+		png("Figures/Figure_3.png",width=800,height=800);
 
-	dev.off();
+		par(mfrow=c(2,2))
+		par(cex.axis=1.75)
+		par(cex.lab=2)
+		par(mar=c(5,6,4,3))
+		par(mgp=c(3,2,0))
+
+		my_letters <- c("(A)","(B)","(C)","(D)");
+
+		for(ft in 1:length(domina))
+		{
+			boxplot(domina[[ft]],ylim=c(0,1),names=c(expression(Sigma[e]),expression(Sigma[d]),expression(Sigma[o])));
+			mtext(my_letters[ft],side=3,line=1.5,adj=0.0,cex=1.5)
+		}
+
+		dev.off();
+	}
+	
+	
+	## Check if Fig. 3 has already been drawn
+	if(file.exists("Figures/Figure_3.png"))
+	{
+		x <- readline("The file Figure_3.png already exists. Do you want to overwritte it ? (y/n):")
+		
+		if(x == "y")
+			plotFig3();
+	}
+	else
+		plotFig3();	
 }
