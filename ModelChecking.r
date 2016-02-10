@@ -181,8 +181,9 @@ to_write <- 0;
 
 if(to_write)
 {
-	tab_S2 <- cbind(round(cbind(kolmo_env,kolmo_demo,kolmo_obs),3),round(cbind(p_val_m,p_val_sd),2));
-	write.csv2(tab_S2,"Full/Table_S2.csv");
+	tab_S2           <- cbind(round(cbind(kolmo_env,kolmo_demo,kolmo_obs),3),round(cbind(p_val_m,p_val_sd),2));
+	rownames(tab_S2) <- sp_names;
+	write.csv2(tab_S2,"Full/Table_S2.csv", row.names=TRUE);
 }
 
 
