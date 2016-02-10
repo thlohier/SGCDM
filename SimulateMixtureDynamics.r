@@ -337,6 +337,5 @@ for(n in 2)
 		stat_sim           <- rbind(M_sim,SD_sim,l_sim);
 		rownames(stat_sim) <- mix_codes;
 		write.table(round(stat_sim,4), paste("Full/Mixtures/stat_sim_",n,".txt",sep=""), sep="\t", row.names=FALSE, col.names=TRUE);
-		}
 	}
 }
